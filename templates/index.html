@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-4">Object Detection Interface</h1>
+
+<form action="/upload" method="post" enctype="multipart/form-data" class="mb-4">
+    <label for="file" class="text-xl">Upload Video:</label>
+    <input type="file" name="file" id="file" class="border rounded p-2">
+    <button type="submit" class="bg-blue-500 text-white p-2 rounded">Upload</button>
+</form>
+
+{% if video_path %}
+<div class="flex justify-center mb-8">
+    <video width="800" height="300" controls>
+        <source src="{{ video_path }}" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+</div>
+{% endif %}
+
+<table class="mx-auto border-collapse border border-gray-600">
+    <thead>
+        <tr>
+            <th class="p-2 border border-gray-600">Class</th>
+            <th class="p-2 border border-gray-600">Count</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td class="p-2 border border-gray-600">Can</td>
+            <td class="p-2 border border-gray-600">10</td>
+        </tr>
+        <tr>
+            <td class="p-2 border border-gray-600">HDPE</td>
+            <td class="p-2 border border-gray-600">5</td>
+        </tr>
+        <tr>
+            <td class="p-2 border border-gray-600">PET Bottle</td>
+            <td class="p-2 border border-gray-600">8</td>
+        </tr>
+        <tr>
+            <td class="p-2 border border-gray-600">Tetrapak</td>
+            <td class="p-2 border border-gray-600">3</td>
+        </tr>
+        <tr>
+            <td class="p-2 border border-gray-600">Plastic Wrapper</td>
+            <td class="p-2 border border-gray-600">6</td>
+        </tr>
+    </tbody>
+</table>
+{% endblock %}
