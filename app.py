@@ -1,74 +1,72 @@
-from flask import Flask, render_template, request, redirect, url_for, Response
+from flask import Flask, render_template, Response, jsonify, request, session, redirect, url_for
+
+#FlaskForm--> it is required to receive input from the user
+# Whether uploading a video file  to our object detection model
+
+from flask_wtf import FlaskForm
+
+from wtforms import FileField, SubmitField,StringField,DecimalRangeField,IntegerRangeField
+from werkzeug.utils import secure_filename
+from wtforms.validators import InputRequired,NumberRange
 import os
+
+
+# Required to run the YOLOv8 model
 import cv2
+
+# YOLO_Video is the python file which contains the code for our object detection model
+#Video Detection is the Function which performs Object Detection on Input Video
+from YOLO_obj_detection import video_detection
 
 app = Flask(__name__)
 
-video_path = None  # Global variable to store the video path
+app.config['SECRET_KEY'] = 'sudhi'
+app.config['UPLOAD_FOLDER'] = 'static/uploads'
 
-# Mocked object detection results (replace with actual YOLO logic)
-def detect_objects(frame):
-    # Implement object detection logic using YOLO
-    # Mocked results: Assume you have the counts for each class
-    counts = {'can': 10, 'HDPE': 5, 'PET_Bottle': 8, 'Tetrapak': 3, 'Plastic_wrapper': 6}
+#Use FlaskForm to get input video file  from user
+class UploadFileForm(FlaskForm):
+    #We store the uploaded video file path in the FileField in the variable file
+    #We have added validators to make sure the user inputs the video in the valid format  and user does upload the
+    #video when prompted to do so
+    file = FileField("File",validators=[InputRequired()])
+    submit = SubmitField("Run")
 
-    # Display counts on the frame
-    for i, (label, count) in enumerate(counts.items()):
-        cv2.putText(frame, f"{label}: {count}", (10, 450 + 30 * i), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
-    return frame
+def generate_frames(path_x = ''):
+    yolo_output = video_detection(path_x)
+    for detection_ in yolo_output:
+        ref,buffer=cv2.imencode('.jpg',detection_)
 
-# Video stream generator
-def generate():
-    cap = cv2.VideoCapture(video_path)
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-
-        if not ret:
-            break
-
-        # Resize the frame for better visualization
-        frame = cv2.resize(frame, (800, 600))
-
-        # Perform object detection
-        processed_frame = detect_objects(frame)
-
-        _, jpeg = cv2.imencode('.jpg', processed_frame)
-        frame_bytes = jpeg.tobytes()
-
+        frame=buffer.tobytes()
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n\r\n')
+                    b'Content-Type: image/jpeg\r\n\r\n' + frame +b'\r\n')
 
-    cap.release()
+@app.route('/', methods=['GET','POST'])
+@app.route('/home', methods=['GET','POST'])
+def home():
+    session.clear()
+    return render_template('index.html', form=UploadFileForm())
 
-# Route for the main page
-@app.route('/')
-def index():
-    return render_template('index.html', video_path=video_path)
+@app.route('/FrontPage', methods=['GET','POST'])
+def front():
+    # Upload File Form: Create an instance for the Upload File Form
+    form = UploadFileForm()
+    if form.validate_on_submit():
+        # Our uploaded video file path is saved here
+        file = form.file.data
+        file.save(os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'],
+                               secure_filename(file.filename)))  # Then save the file
+        # Use session storage to save video file path
+        session['video_path'] = os.path.join(os.path.abspath(os.path.dirname(__file__)), app.config['UPLOAD_FOLDER'],
+                                             secure_filename(file.filename))
+        print(session['video_path'])
+        
+    return render_template('index.html', form=form)
 
-# Route for video streaming
-@app.route('/video_feed')
-def video_feed():
-    return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+@app.route('/video')
+def video():
+    #return Response(generate_frames(path_x='static/files/bikes.mp4'), mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(path_x = session.get('video_path', None)),mimetype='multipart/x-mixed-replace; boundary=frame')
 
-# Route for uploading video
-@app.route('/upload', methods=['POST'])
-def upload():
-    global video_path
-
-    if 'file' not in request.files:
-        return redirect(request.url)
-
-    file = request.files['file']
-
-    if file.filename == '':
-        return redirect(request.url)
-
-    if file:
-        video_path = os.path.join('static', 'uploads', file.filename)
-        file.save(video_path)
-        return redirect(url_for('index'))
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
