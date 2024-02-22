@@ -10,7 +10,7 @@ class_list = ['Can', 'HDPE', 'PET_BOTTLE', 'Plastic_wrapper', 'Tetrapak']
 START = sv.Point(160,0)
 END = sv.Point(160,640)
 
-model=YOLO('best.pt')
+model=YOLO('models\\best.pt')
 line_Zone = []
 for i in range(5):
     line_Zone.append(sv.LineZone(start=START, end=END))
@@ -26,8 +26,8 @@ box_annotator = sv.BoxAnnotator(
     text_thickness=1,
     text_scale=0.5
 )
-cls = [0,0,0,0,0,0]
-out=cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 20, (640,640))
+# cls = [0,0,0,0,0,0]
+# out=cv2.VideoWriter('output.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 20, (640,640))
 
 def classCount(line_zone,det,id):
     line_zone.trigger(detections = det)
@@ -38,8 +38,8 @@ def coord(detections):
     for xyxy, _, class_id, tracker_id in detections:
         print(f"{class_list[class_id]} {tracker_id} {xyxy}")
 
-def main():
-    for result in model.track(source='tracker2.mp4', show=False, stream=True, persist=True, agnostic_nms=True, tracker="botsort.yaml"):
+def video_tracking(path, cls):
+    for result in model.track(source=path, show=False, stream=True, persist=True, agnostic_nms=True, tracker="botsort.yaml"):
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
         # print(result.boxes.id)
@@ -68,14 +68,5 @@ def main():
         frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
         #To make line visible (Only be able to see the count of CAN Class)
         #line_zone_annotator.annotate(frame,line_Zone[0])
-        out.write(frame)
-        cv2.imshow('track',frame)
-        if(cv2.waitKey(30) == 27):
-            break
-    print("Final count of each class = ",cls)
-    out.release()
+        yield frame, cls
     cv2.destroyAllWindows()
-    
-
-if __name__ == "__main__":
-    main()

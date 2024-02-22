@@ -16,12 +16,15 @@ import cv2
 
 # YOLO_Video is the python file which contains the code for our object detection model
 #Video Detection is the Function which performs Object Detection on Input Video
-from YOLO_obj_detection import video_detection
+# from YOLO_obj_detection import video_detection
+from object_detect_track import video_tracking
 
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'sudhi'
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
+
+cls = [0,0,0,0,0]
 
 #Use FlaskForm to get input video file  from user
 class UploadFileForm(FlaskForm):
@@ -32,12 +35,13 @@ class UploadFileForm(FlaskForm):
     submit = SubmitField("Run")
 
 
-def generate_frames(path_x = ''):
-    yolo_output = video_detection(path_x)
-    for detection_ in yolo_output:
+def generate_frames(path_x = '', cls=None):
+    yolo_output = video_tracking(path_x, cls)
+    for detection_, cls_update in yolo_output:
         ref,buffer=cv2.imencode('.jpg',detection_)
 
         frame=buffer.tobytes()
+        cls = cls_update
         yield (b'--frame\r\n'
                     b'Content-Type: image/jpeg\r\n\r\n' + frame +b'\r\n')
 
@@ -45,7 +49,7 @@ def generate_frames(path_x = ''):
 @app.route('/home', methods=['GET','POST'])
 def home():
     session.clear()
-    return render_template('index.html', form=UploadFileForm())
+    return render_template('index.html', form=UploadFileForm(), cls=cls)
 
 @app.route('/FrontPage', methods=['GET','POST'])
 def front():
@@ -61,12 +65,12 @@ def front():
                                              secure_filename(file.filename))
         print(session['video_path'])
         
-    return render_template('index.html', form=form)
+    return render_template('index.html', form=form, cls=cls)
 
 @app.route('/video')
 def video():
     #return Response(generate_frames(path_x='static/files/bikes.mp4'), mimetype='multipart/x-mixed-replace; boundary=frame')
-    return Response(generate_frames(path_x = session.get('video_path', None)),mimetype='multipart/x-mixed-replace; boundary=frame')
+    return Response(generate_frames(path_x = session.get('video_path', None), cls=cls),mimetype='multipart/x-mixed-replace; boundary=frame')
 
 if __name__ == "__main__":
     app.run(debug=True)
