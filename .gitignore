@@ -1,5 +1,16 @@
-node_modules/
-static/uploads/*
-models/*
-__pycache__ /
-*.pyc
+frontend/node_modules
+backend/uploads/*
+backend/detect-model/*
+backend/__pycache__/
+backend/*.pyc
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
