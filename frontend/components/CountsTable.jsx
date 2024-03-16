@@ -24,11 +24,11 @@ const CountsTable = ({clsList}) => {
                         <td className="border px-4 py-2">{clsList[2]}</td>
                     </tr>
                     <tr className='bg-gray-100'>
-                        <td className="border px-4 py-2">Tetrapak</td>
+                        <td className="border px-4 py-2">Plastic_wrapper</td>
                         <td className="border px-4 py-2">{clsList[3]}</td>
                     </tr>
                     <tr className='bg-gray-100'>
-                        <td className="border px-4 py-2">Plastic_wrapper</td>
+                        <td className="border px-4 py-2">Tetrapak</td>
                         <td className="border px-4 py-2">{clsList[4]}</td>
                     </tr>
                 </tbody>

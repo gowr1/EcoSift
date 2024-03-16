@@ -2,8 +2,8 @@ from ultralytics import YOLO
 import supervision as sv
 
 class_list = ['Can', 'HDPE', 'PET_BOTTLE', 'Plastic_wrapper', 'Tetrapak']
-START = sv.Point(160,0)
-END = sv.Point(160,640)
+START = sv.Point(560,0)
+END = sv.Point(560,1200)
 
 model = YOLO('detect-model\\best.pt')
 line_Zone = []
@@ -32,8 +32,8 @@ def coord(detections):
         print(f"{class_list[class_id]} {tracker_id} {xyxy}")
 
 def video_tracking(path):
-    cls = [0,0,0,0,0,0]
-    for result in model.track(source=path, show=False, stream=True, persist=True, agnostic_nms=True, tracker="botsort.yaml"):
+    cls = [0,0,0,0,0]
+    for result in model.track(source=path, show=False, stream=True, persist=True, agnostic_nms=True, tracker="bytetrack.yaml", conf=0.5):
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
         if result.boxes.id is not None:
@@ -60,5 +60,5 @@ def video_tracking(path):
 
         frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
         #To make line visible (Only be able to see the count of CAN Class)
-        #line_zone_annotator.annotate(frame,line_Zone[0])
+        line_zone_annotator.annotate(frame,line_Zone[0])
         yield frame, cls
