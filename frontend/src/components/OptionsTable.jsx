@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 
+const url = 'http://127.0.0.1:5000';
+
 const OptionsTable = ({ setClsList, setOptionsSelected }) => {
     const [selectedClasses, setSelectedClasses] = useState([]);
     const clsList = ["Can", "HDPE", "PET_Bottle", "Plastic_wrapper", "Tetrapak"]
@@ -18,6 +20,23 @@ const OptionsTable = ({ setClsList, setOptionsSelected }) => {
     const handleSumbit = () => {
         setOptionsSelected(true);
         setClsList(selectedClasses);
+        
+        const postClsList = async () => {
+            try {
+                const response = await fetch(url.concat('/receive_list'), {
+                    method: 'POST',
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ selectedClasses })
+                })
+                console.log(response.json());
+            } catch (error) {
+                console.log(error);
+            }
+        }
+
+        postClsList();
     }
 
     return (
@@ -33,7 +52,7 @@ const OptionsTable = ({ setClsList, setOptionsSelected }) => {
                     {
                         clsList.map(item => {
                             return (
-                                <tr className='bg-gray-100'>
+                                <tr key={item} className='bg-gray-100'>
                                     <td className="border-green-600 border-2 px-4 py-2"><input type="checkbox" value={item} onChange={(e) => handleChange(e.target.value)} checked={selectedClasses.includes(item)} /></td>
                                     <td className="border-green-600 border-2 px-4 py-2">{item}</td>
                                 </tr>

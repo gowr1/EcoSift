@@ -12,6 +12,14 @@ def generate_frames(path_x=''):
 
         yield (frame_bytes, cls_json)
 
+# POST method to accept custom clsList
+@app.route('/receive_list', methods=['POST'])
+def receive_list():    
+    clsList = request.json.get('selectedClasses', [])
+    print(clsList)
+
+    return jsonify({'message': 'clsList sent successfully'}), 201
+
 # POST method to accept video file and save it locally
 @app.route('/upload_video', methods=['POST'])
 def upload_video():
