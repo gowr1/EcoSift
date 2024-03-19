@@ -31,30 +31,31 @@ def coord(detections):
     for xyxy, _, class_id, tracker_id in detections:
         print(f"{class_list[class_id]} {tracker_id} {xyxy}")
 
-def video_tracking(path):
+def video_tracking(path,cls_select):
     cls = [0,0,0,0,0]
+    cls_selectIndex=[]
+    cls_notSelectIndex = [0,1,2,3,4]
+    det=[0,0,0,0,0]
+    for i in cls_select:
+        cls_selectIndex.append(class_list.index(i))
+        cls_notSelectIndex.remove(class_list.index(i))
+
     for result in model.track(source=path, show=False, stream=True, persist=True, agnostic_nms=True, tracker="bytetrack.yaml", conf=0.5):
         frame = result.orig_img
         detections = sv.Detections.from_yolov8(result)
         if result.boxes.id is not None:
             detections.tracker_id = result.boxes.id.cpu().numpy().astype(int)
+        for index in cls_notSelectIndex:
+            detections = detections[detections.class_id != index]
         labels=[
                 f"{tracker_id} {result.names[class_id]} {confidence:0.2f}"
                 for _, confidence, class_id, tracker_id
                 in detections
         ]
 
-        det0 = detections[detections.class_id == 0]
-        det1 = detections[detections.class_id == 1]
-        det2 = detections[detections.class_id == 2]
-        det3 = detections[detections.class_id == 3]
-        det4 = detections[detections.class_id == 4]
-        
-        cls[0] = classCount(line_Zone[0],det0,0)
-        cls[1] = classCount(line_Zone[1],det1,1)
-        cls[2] = classCount(line_Zone[2],det2,2)
-        cls[3] = classCount(line_Zone[3],det3,3)
-        cls[4] = classCount(line_Zone[4],det4,4)
+        for index in cls_selectIndex:
+            det[index] = detections[detections.class_id == index]
+            cls[index] = classCount(line_Zone[index],det[index],index)
 
         coord(detections)
 
