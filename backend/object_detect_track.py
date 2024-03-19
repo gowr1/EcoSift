@@ -36,6 +36,7 @@ def video_tracking(path,cls_select):
     cls_selectIndex=[]
     cls_notSelectIndex = [0,1,2,3,4]
     det=[0,0,0,0,0]
+    final_count = dict()
     for i in cls_select:
         cls_selectIndex.append(class_list.index(i))
         cls_notSelectIndex.remove(class_list.index(i))
@@ -62,4 +63,7 @@ def video_tracking(path,cls_select):
         frame = box_annotator.annotate(scene=frame, detections=detections, labels=labels)
         #To make line visible (Only be able to see the count of CAN Class)
         line_zone_annotator.annotate(frame,line_Zone[0])
-        yield frame, cls
+        for i in cls_select:
+            final_count[i]=cls[class_list.index(i)]
+        # print("Final count of each class = ",final_count)
+        yield frame, final_count
