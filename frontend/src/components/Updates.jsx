@@ -13,11 +13,11 @@ const Updates = ({ clsList }) => {
         </thead>
         <tbody>
           {
-            clsList.map((item, index) => {
+            Object.keys(clsList).map((key, index) => {
               return (
-                <tr key={item} className='bg-gray-100'>
-                  <td className="border-green-600 border-2 px-4 py-2">{item}</td>
-                  <td className="border-green-600 border-2 px-4 py-2">{index}</td>
+                <tr key={key} className='bg-gray-100'>
+                  <td className="border-green-600 border-2 px-4 py-2">{key}</td>
+                  <td className="border-green-600 border-2 px-4 py-2">{clsList[key]}</td>
                   <td className="border-green-600 border-2 px-4 py-2">{index + 1}</td>
                 </tr>
               )

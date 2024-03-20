@@ -6,31 +6,32 @@ const OptionsTable = ({ setClsList, setOptionsSelected }) => {
     const [selectedClasses, setSelectedClasses] = useState([]);
     const clsList = ["Can", "HDPE", "PET_Bottle", "Plastic_wrapper", "Tetrapak"]
     const handleChange = (value) => {
-        // If checkbox is checked, add its value to the list
-        // If checkbox is unchecked, remove its value from the list
-        setSelectedClasses(prevState => {
-            if (prevState.includes(value)) {
-                return prevState.filter(item => item !== value);
+        setSelectedClasses(prev => {
+            if (prev.includes(value)) {
+                return prev.filter(item => item !== value);
             } else {
-                return [...prevState, value];
+                return [...prev, value];
             }
         });
     }
 
     const handleSumbit = () => {
         setOptionsSelected(true);
-        setClsList(selectedClasses);
-        
+        const clsObj = {};
+        selectedClasses.forEach(item => {
+            clsObj[item] = 0;
+        });
+
         const postClsList = async () => {
             try {
-                const response = await fetch(url.concat('/receive_list'), {
+                await fetch(url.concat('/receive_list'), {
                     method: 'POST',
                     headers: {
                         "Content-Type": "application/json"
                     },
                     body: JSON.stringify({ selectedClasses })
                 })
-                console.log(response.json());
+                setClsList(clsObj);
             } catch (error) {
                 console.log(error);
             }

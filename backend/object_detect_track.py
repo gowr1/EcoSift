@@ -1,7 +1,7 @@
 from ultralytics import YOLO
 import supervision as sv
 
-class_list = ['Can', 'HDPE', 'PET_BOTTLE', 'Plastic_wrapper', 'Tetrapak']
+class_list = ["Can", "HDPE", "PET_Bottle", "Plastic_wrapper", "Tetrapak"]
 START = sv.Point(560,0)
 END = sv.Point(560,1200)
 
@@ -31,7 +31,7 @@ def coord(detections):
     for xyxy, _, class_id, tracker_id in detections:
         print(f"{class_list[class_id]} {tracker_id} {xyxy}")
 
-def video_tracking(path,cls_select):
+def video_tracking(cls_select, path):
     cls = [0,0,0,0,0]
     cls_selectIndex=[]
     cls_notSelectIndex = [0,1,2,3,4]

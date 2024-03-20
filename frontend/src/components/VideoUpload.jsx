@@ -9,7 +9,7 @@ const VideoUpload = () => {
   const [videoUrl, setVideoUrl] = useState('');
   const [uploadStatus, setUploadStatus] = useState(null);
   const [isUploaded, setIsUploaded] = useState(false);
-  const [clsList, setClsList] = useState([]);
+  const [clsList, setClsList] = useState({});
   const [optionsSelected, setOptionsSelected] = useState(false);
 
   const videoRef = useRef(null);
@@ -23,6 +23,7 @@ const VideoUpload = () => {
       videoRef.current.src = imageUrl;
 
       const clsList = JSON.parse(data.cls);
+      console.log(clsList);
       setClsList(clsList);
     });
 
